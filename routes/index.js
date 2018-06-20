@@ -8,14 +8,14 @@ router.get('/', (req, res) => {
 });
 
 /* GET pets listing. */
-router.get('/pets', ((req, res) => {
-    models.Pet.findAll()
-        .then(pets => {
-            res.json(pets)
-        })
-        .catch(error => {
-            res.send(error.message)
-        });
+router.get('/pets', (async (req, res) => {
+    try {
+        const pets = models.Pet.findAll()
+        res.json(pets);
+    } catch (error) {
+        res.send(error.message);
+    }
+
 }));
 
 router.get('/pets/:id', ((req, res) => {
@@ -48,21 +48,36 @@ router.get('/pets/:id', ((req, res) => {
 }));
 
 /* CREATE a pet */
-router.post('/pets', (req, res) => {
-    models.Pet.create({
-        name: req.body.name,
-        hygiene: 0,
-        poop: 0,
-        hunger: 0,
-        createdAt: Date.now(),
-        updatedAt: Date.now()
-    })
-    .then(pet => {
-        res.json(pet)
-    })
-    .catch(error => {
-        res.end(error.message)
-    });
+router.post('/pets', async (req, res) => {
+    try {
+        const pet = await models.Pet.create({
+            name: req.body.name,
+            hygiene: 0,
+            poop: 0,
+            hunger: 0,
+            createdAt: Date.now(),
+            updatedAt: Date.now()
+        })
+        res.json(pet);
+    } catch (error) {
+        res.send(error.message);
+    }
+})
+
+/* UPDATE a pet */
+router.patch('/pets/:id', async (req, res) => {
+    try {
+        const pet = await models.Pet.update(req.body, {
+            where: {
+                id: req.params.id
+            },
+            returning: true,
+        });
+        res.json(...pet[1]);
+    } catch (error) {
+        console.log(error.message)
+        res.send(error.message);
+    }
 })
 
 module.exports = router;
